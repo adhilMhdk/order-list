@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order list</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+</head>
+
+<body class="bg-light">
+
+
+
+
+
+    <center>
+        <h1>Admin</h1>
+    </center>
+
+    <center>
+
+
+        <button onclick="newPage()" class="btn btn-success">NEW ORDER</button>
+
+
+
+        <div class="p-4 border bg-white mt-3" style="width: 70%;">
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Id</th>
+                        <th scope="col">Platform</th>
+                        <th scope="col">Status</th>
+                        <th class="col">Mark as ready</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                </tbody>
+            </table>
+        </div>
+
+
+    </center>
+
+
+    <style>
+        .box {
+            width: 20px;
+            height: 20px;
+
+            padding: 5px;
+
+
+        }
+    </style>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+        crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-database.js"></script>
+
+
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyDELn_igbn9wyHjt4e7BZqM1x3JCkKPnZs",
+            authDomain: "order-list-9b9dd.firebaseapp.com",
+            databaseURL: "https://order-list-9b9dd-default-rtdb.firebaseio.com",
+            projectId: "order-list-9b9dd",
+            storageBucket: "order-list-9b9dd.appspot.com",
+            messagingSenderId: "1084839047485",
+            appId: "1:1084839047485:web:9b5a5d1a26dc033bb95554",
+            measurementId: "G-W0J66G221R"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+    </script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            a = "'"
+            var tBody = '<tr><th scope="row">TYPE_NUMBER_HERE</th><td>TYPE_YOUR_ID</td><td>TYPE_PLATFORM</td><td><div><div class="box border"style="border-color: rgb(170, 255, 0) !important; background-color: rgb(170, 255, 0);"></div><span style="float: left;">Ready</span><div class="box border"style="border-color: yellowgreen !important; background-color: yellowgreen;"></div><span style="float: left;">Preparing</span></div></td><td><button onclick="complete(' + a + 'TYPE_YOUR_ID' + a + ')" class="btn btn-success">Compleate order</button><button onclick="mark(' + a + 'TYPE_YOUR_ID' + a + ')" class="btn btn-success">Mark as ready</button></td></tr>'
+
+            firebase.database().ref('list').on('value', (data) => {
+
+                var count = 1
+
+                data.forEach(element => {
+                    if (element.val().id.endsWith('MARK_AS_READY')) {
+                        var appendData = tBody.replace('TYPE_NUMBER_HERE', count).replace('<div class="box border"style="border-color: yellowgreen !important; background-color: yellowgreen;"></div><span style="float: left;">Preparing</span>', '').replace('<button onclick="mark', '<button hidden onclick="mark').replace("'TYPE_YOUR_ID'", a + element.val().id + a).replace('TYPE_PLATFORM', element.val().plat).replace('TYPE_YOUR_ID', element.val().id)
+                        appendData = appendData.replace('MARK_AS_READY', '').replace("'TYPE_YOUR_ID'", a + element.val().id + a)
+                        $('#tb').append(appendData)
+
+                    } else {
+                        var appendData = tBody.replace('TYPE_NUMBER_HERE', count).replace('<div class="box border"style="border-color: rgb(170, 255, 0) !important; background-color: rgb(170, 255, 0);"></div><span style="float: left;">Ready</span>', '').replace('<button onclick="complete', '<button hidden onclick="complete').replace('TYPE_PLATFORM', element.val().plat).replace('TYPE_YOUR_ID', element.val().id)
+                        appendData = appendData.replace("'TYPE_YOUR_ID'", a + element.val().id + a).replace("'TYPE_YOUR_ID'", a + element.val().id + a)
+                        $('#tb').append(appendData)
+                    }
+                    count = count + 1
+                });
+            })
+
+
+
+        })
+
+
+        function mark(id) {
+            $('#tb').empty()
+            firebase.database().ref('list').child(id).update({ 'id': id + 'MARK_AS_READY' })
+            console.log(id);
+
+        }
+
+        function complete(id) {
+            id = id.replace('MARK_AS_READY', '')
+            console.log(id);
+            $('#tb').empty()
+            firebase.database().ref('list').child(id).remove()
+        }
+        function newPage() {
+            var loc = window.location.pathname;
+            var dir = loc.substring(0, loc.lastIndexOf('/'));
+            window.location.href = dir + '/new.html'
+        }
+
+
+    </script>
+
+
+
+
+
+
+
+</body>
+
+</html>
